@@ -1,9 +1,39 @@
+using System.Text.Json;
+using BartdeBever.EventTracking.Contexts;
+using BartdeBever.EventTracking.Repositories;
+using BartdeBever.EventTracking.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// Configure database context with Postgres
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<EventTrackingDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// Register repositories and services
+builder.Services.AddScoped<IEventLogRepository, EventLogRepository>();
+builder.Services.AddScoped<IEventService, EventService>();
+
+// Add Application Insights if configured
+var appInsightsConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
+if (!string.IsNullOrEmpty(appInsightsConnectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        options.ConnectionString = appInsightsConnectionString;
+    });
+}
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Configure JSON serialization for proper handling of the Data property
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

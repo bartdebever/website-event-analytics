@@ -5,6 +5,7 @@ namespace BartdeBever.EventTracking.Models;
 public class EventLog
 {
     [Column("id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
     
     [Column("event_name")]
@@ -17,8 +18,8 @@ public class EventLog
     public DateTime CreatedAt { get; set; }
     
     [Column("url")]
-    public string Url { get; set; }
+    public string? Url { get; set; }
     
     [Column("data")]
-    public object Data { get; set; }
+    public object? Data { get; set; }
 }
