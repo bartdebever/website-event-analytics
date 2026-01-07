@@ -1,5 +1,6 @@
 using System.Text.Json;
 using BartdeBever.EventTracking.Contexts;
+using BartdeBever.EventTracking.Filters;
 using BartdeBever.EventTracking.Repositories;
 using BartdeBever.EventTracking.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,11 @@ builder.Services.AddDbContext<EventTrackingDbContext>(options =>
 
 // Register repositories and services
 builder.Services.AddScoped<IEventLogRepository, EventLogRepository>();
+builder.Services.AddScoped<ApplicationRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
+
+// Register filters
+builder.Services.AddScoped<ApiKeyAuthenticationFilter>();
 
 // Add Application Insights if configured
 var appInsightsConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];

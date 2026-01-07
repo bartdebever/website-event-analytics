@@ -10,7 +10,7 @@ namespace BartdeBever.EventTracking.Services;
 
 public interface IEventService
 {
-    Task<EventLog> CreateEventLogAsync(CreateEventLogDto dto);
+    Task<EventLog> CreateEventLogAsync(CreateEventLogDto dto, Guid applicationId);
     Task<EventLog?> GetEventLogByIdAsync(long id);
 }
 
@@ -30,21 +30,23 @@ public class EventService : IEventService
         _telemetryClient = telemetryClient;
     }
 
-    public async Task<EventLog> CreateEventLogAsync(CreateEventLogDto dto)
+    public async Task<EventLog> CreateEventLogAsync(CreateEventLogDto dto, Guid applicationId)
     {
         var eventLog = EventLogMapper.CreateEventLogDto(dto);
+        eventLog.ApplicationId = applicationId;
 
         try
         {
             var createdEvent = await _repository.CreateAsync(eventLog);
-            
+
             TrackEventToApplicationInsights(createdEvent);
 
             _logger.LogInformation(
-                "Event log created: {EventName} with ID {EventLogId} for session {SessionId}",
+                "Event log created: {EventName} with ID {EventLogId} for session {SessionId} and application {ApplicationId}",
                 createdEvent.EventName,
                 createdEvent.Id,
-                createdEvent.SessionId);
+                createdEvent.SessionId,
+                createdEvent.ApplicationId);
 
             return createdEvent;
         }
@@ -73,7 +75,8 @@ public class EventService : IEventService
             Properties =
             {
                 ["SessionId"] = eventLog.SessionId.ToString(),
-                ["EventLogId"] = eventLog.Id.ToString()
+                ["EventLogId"] = eventLog.Id.ToString(),
+                ["ApplicationId"] = eventLog.ApplicationId.ToString()
             }
         };
 

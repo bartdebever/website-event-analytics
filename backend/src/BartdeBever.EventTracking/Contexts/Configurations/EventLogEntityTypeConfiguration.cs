@@ -15,6 +15,8 @@ public class EventLogEntityTypeConfiguration : IEntityTypeConfiguration<EventLog
         builder.Property(eventLog => eventLog.SessionId).IsRequired();
         builder.Property(eventLog => eventLog.CreatedAt).IsRequired();
         builder.Property(eventLog => eventLog.Url).HasMaxLength(2048);
+        
+        builder.HasOne(eventLog => eventLog.Application).WithMany().HasForeignKey(eventLog => eventLog.ApplicationId);
 
         // Store JSON data as jsonb in Postgres
         builder.Property(eventLog => eventLog.Data).HasColumnType("jsonb");

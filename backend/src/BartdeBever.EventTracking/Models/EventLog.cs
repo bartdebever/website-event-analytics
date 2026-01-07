@@ -22,4 +22,9 @@ public class EventLog
     
     [Column("data")]
     public object? Data { get; set; }
+
+    [Column("application_id")]
+    public Guid ApplicationId { get; set; }
+
+    public Application Application { get; set; }
 }
